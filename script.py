@@ -10,6 +10,7 @@ import urllib3
 # import warnings
 
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from scipy.stats import normaltest
 from tqdm import tqdm
 
@@ -364,9 +365,14 @@ def add_population(df: pd.DataFrame) -> pd.DataFrame:
 if __name__ == '__main__':
 
     # Specify the data file path
-    input_path = r'C:\Users\alejandro.lema\Downloads\Challenge Data Engineer\data.csv'
     
-    # @@ pending: propose a way to pass the path without hardcoding (many options available)
+    # For now, the code asumes that the data.csv file is on the same folder
+    # than this script.py file
+    script_path = str(Path(__file__).parent.resolve()) # this line fails when executed alone, the whole cell or script must be run
+    input_path = os.path.join(script_path, 'data.csv')
+    
+    # @@ pending: propose a way to pass the path without hardcoding (many
+    # options available, even reading the files from cloud storage such as S3)
     
     # Read the data
     df = read_data(input_path)

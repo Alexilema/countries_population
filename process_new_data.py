@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # Libraries
-import numpy as np
 import os
 import pandas as pd
+
+from pathlib import Path
 from sys import path
 
 # Import our processing functions from script.py
@@ -13,7 +14,11 @@ import script as mf
 
 #%%
 # Specify the existing processed data file path
-processed_path = r'C:\Users\alejandro.lema\Downloads\Challenge Data Engineer\data_processed.csv'
+
+# For now, the code asumes that the data.csv file is on the same folder
+# than this script.py file
+script_path = str(Path(__file__).parent.resolve()) # this line fails when executed alone, the whole cell or script must be run
+processed_path = os.path.join(script_path, 'data_processed.csv')
 
 # Read existing data
 df_pr = mf.read_data(
@@ -21,7 +26,7 @@ df_pr = mf.read_data(
     first_as_index=False)  # Careful, now first col is not the index
 
 # Specify the NEW data file path
-input_path = r'C:\Users\alejandro.lema\Downloads\Challenge Data Engineer'
+input_path = script_path
 
 new_csv_filename = input("Especify the name of the .csv file to be processed."
                          "Please note it must be located at:\n"
