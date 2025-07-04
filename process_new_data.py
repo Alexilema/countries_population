@@ -2,6 +2,7 @@
 
 # Libraries
 import numpy as np
+import os
 import pandas as pd
 from sys import path
 
@@ -20,7 +21,17 @@ df_pr = mf.read_data(
     first_as_index=False)  # Careful, now first col is not the index
 
 # Specify the NEW data file path
-input_path = r'C:\Users\alejandro.lema\Downloads\Challenge Data Engineer\data_1.csv'
+input_path = r'C:\Users\alejandro.lema\Downloads\Challenge Data Engineer'
+
+new_csv_filename = input("Especify the name of the .csv file to be processed."
+                         "Please note it must be located at:\n"
+                         f"{input_path}:"
+                         )
+# Make sure the extension is included
+if not new_csv_filename.endswith('.csv'):
+    new_csv_filename += '.csv'
+
+input_path = os.path.join(input_path, new_csv_filename)
 
 # Read the data
 df = mf.read_data(input_path) # Here, first col is indeed the index
