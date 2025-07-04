@@ -5,9 +5,11 @@ import numpy as np
 import os
 import pandas as pd
 import requests
+import traceback
 import urllib3
 # import warnings
 
+from concurrent.futures import ThreadPoolExecutor
 from scipy.stats import normaltest
 from tqdm import tqdm
 
@@ -304,8 +306,40 @@ def add_population(df: pd.DataFrame) -> pd.DataFrame:
     query_dict = {}
     
     # Make the query for each country and safe the returned values in a dict
-    for country in tqdm(countries, desc='API population query', total=len(countries), colour='cyan'):
-        query_dict[country] = get_country_population(country)
+    
+    # We can try to speed up the queries by using local parallel computation,
+    # also known as MultiThreading
+    
+    ## - Classic ejecution
+    # for country in tqdm(countries, desc='API population query', total=len(countries)):
+    #     query_dict[country] = get_country_population(country)
+    
+    ## - MultiThreading
+    try:
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            # Don't use too many workers:
+            # - always less than the number of cores of the computer
+            # - try to avoid the "429 Too Many Requests" code error
+            
+            futures = []
+            with tqdm(desc='API population query', total=len(countries)) as pbar:
+                for country in countries:
+                    future = executor.submit(get_country_population, country)
+                    futures.append([country, future])
+                
+                for country, future in futures:
+                    try:
+                        result = future.result()
+                        if result:  # Don't include the result if its None
+                            query_dict.update({country: result})
+                        pbar.update(1)
+                    
+                    except Exception as e:
+                        print(f"Error while processing {country}: {e}")  
+    
+    except Exception:
+        print(traceback.format_exc())
+        raise
     
     # Build the population column by mapping the dict info onto the df
     df['population'] = df['country_names'].map(query_dict)
